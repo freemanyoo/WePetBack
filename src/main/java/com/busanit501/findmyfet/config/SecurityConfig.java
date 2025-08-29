@@ -79,6 +79,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer; // ✅ CSRF, 세션 관리를 위한 import
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -103,6 +104,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // ✅ WebSecurityCustomizer를 Bean으로 등록하여 보안을 완전히 무시할 경로를 설정합니다.
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/upload/**", "/favicon.ico", "/swagger-ui/**", "/v3/api-docs/**");
+    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -115,44 +123,33 @@ public class SecurityConfig {
         return source;
     }
 
-    // ✅ [체인 1] 정적 리소스용 보안 설정 (가장 높은 우선순위)
+    // ✅ SecurityFilterChain은 하나로 통합하여 관리하는 것이 더 명확할 수 있습니다.
     @Bean
-    @Order(0)
-    public SecurityFilterChain resources(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/upload/**", "/favicon.ico") // ✅ 이 경로들에 대해서만 이 필터 체인을 적용
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll() // 모든 요청을 허용
-                )
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
-                .securityContext(AbstractHttpConfigurer::disable)
-                .requestCache(AbstractHttpConfigurer::disable);
-
-        return http.build();
-    }
-
-    // ✅ [체인 2] API 및 기타 경로용 보안 설정 (두 번째 우선순위)
-    @Bean
-    @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // 인증 없이 허용할 API 경로
+                        // 인증 없이 허용할 API 경로 (GET 요청들)
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/posts/**",
+                                "/api/comments/**",
+                                "/api/find-pets/**", // <<<<<<<<<<<< 이 경로 추가
+                                "/api/categories/**", // <<<<<<<<<<<< API 명세서 기반 추가
+                                "/api/regions/**"     // <<<<<<<<<<<< API 명세서 기반 추가
+                        ).permitAll()
+                        // 인증 없이 허용할 API 경로 (POST 요청이지만 인증이 필요 없는 경우)
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/comments/**", "/api/find-pets/**").permitAll()
 
-                        // 인증이 필요한 API 경로
-                        .requestMatchers("/api/users/me", "/api/posts/my").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 위에 명시되지 않은 나머지 모든 경로는 인증을 요구
+                        // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // 관리자 권한 설정은 각 컨트롤러 메서드에 @PreAuthorize("hasRole('ADMIN')")를 사용하는 것을 권장합니다.
+        // 또는 여기에 .requestMatchers("/api/admin/**").hasRole("ADMIN")을 추가할 수 있습니다.
+        // .anyRequest().authenticated() 앞에 추가해야 합니다.
 
         return http.build();
     }

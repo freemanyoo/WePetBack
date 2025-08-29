@@ -1,20 +1,17 @@
 package com.busanit501.findmyfet.controller;
 
 import com.busanit501.findmyfet.dto.CommentDTO;
-import com.busanit501.findmyfet.security.UserDetailsImpl;
+import com.busanit501.findmyfet.security.UserDetailsImpl; // ✅ UserDetailsImpl import
 import com.busanit501.findmyfet.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -24,24 +21,20 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    // ✅ 수정된 메서드
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<Page<CommentDTO>> getCommentList(
-            @PathVariable Long postId,
-            // 클라이언트에서 page, size, sort 파라미터를 받음
-            // 기본값: page=0, size=10, 정렬=최신순(createdAt DESC)
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        log.info("getCommentList 호출 (페이징 적용), postId: {}, pageable: {}", postId, pageable);
-        Page<CommentDTO> commentPage = commentService.getCommentsByPostId(postId, pageable);
-        return ResponseEntity.ok(commentPage);
+    public ResponseEntity<List<CommentDTO>> getCommentList(@PathVariable Long postId) {
+        log.info("getCommentList 호출, postId: " + postId);
+        List<CommentDTO> commentList = commentService.getCommentsByPostId(postId);
+        return ResponseEntity.ok(commentList);
     }
 
     @PostMapping(value = "/posts/{postId}/comments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommentDTO> createComment(@PathVariable Long postId,
                                                     @RequestPart("commentDTO") CommentDTO commentDTO,
                                                     @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
+                                                    // ✅ 타입을 UserDetailsImpl로 변경
                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // ✅ userDetails에서 userId를 직접 추출
         Long userId = userDetails.getUserid();
         log.info("createComment 호출, postId: {}, by user: {}", postId, userId);
 
@@ -54,7 +47,9 @@ public class CommentController {
     public ResponseEntity<CommentDTO> updateComment(@PathVariable Long commentId,
                                                     @RequestPart("commentDTO") CommentDTO commentDTO,
                                                     @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
+                                                    // ✅ 타입을 UserDetailsImpl로 변경
                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // ✅ userDetails에서 userId를 직접 추출
         Long userId = userDetails.getUserid();
         log.info("updateComment 호출, commentId: {}, by user: {}", commentId, userId);
 
@@ -64,7 +59,9 @@ public class CommentController {
 
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId,
+                                              // ✅ 타입을 UserDetailsImpl로 변경
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // ✅ userDetails에서 userId를 직접 추출
         Long userId = userDetails.getUserid();
         log.info("deleteComment 호출, commentId: {}, by user: {}", commentId, userId);
 
