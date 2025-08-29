@@ -20,6 +20,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Post post; // 댓글이 속한 게시글
 
     @ManyToOne(fetch = FetchType.LAZY)
