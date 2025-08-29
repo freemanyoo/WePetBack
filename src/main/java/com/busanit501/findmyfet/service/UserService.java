@@ -97,6 +97,9 @@ public class UserService {
         if (StringUtils.hasText(requestDTO.getAddress())) {
             user.setAddress(requestDTO.getAddress());
         }
+        if (StringUtils.hasText(requestDTO.getEmail())) {
+            user.setEmail(requestDTO.getEmail());
+        }
 
         if (requestDTO.getPasswordChange() != null) {
             UserUpdateRequestDTO.PasswordChangeDTO passwordChange = requestDTO.getPasswordChange();

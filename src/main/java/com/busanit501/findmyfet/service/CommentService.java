@@ -11,6 +11,8 @@ import com.busanit501.findmyfet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,9 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class CommentService {
     @Value("${upload.dir}")
     private String uploadDir;
 
-    public CommentDTO createComment(CommentDTO commentDTO, Long userId, MultipartFile imageFile) { // ✅ String loginId -> Long userId
+    public CommentDTO createComment(CommentDTO commentDTO, Long userId, MultipartFile imageFile) {
         Post post = postRepository.findById(commentDTO.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
@@ -44,7 +44,6 @@ public class CommentService {
             throw new IllegalStateException("이미 찾기 완료된 게시글에는 댓글을 작성할 수 없습니다.");
         }
 
-        // ✅ findByLoginId -> findById
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
@@ -64,11 +63,10 @@ public class CommentService {
         return entityToDto(savedComment);
     }
 
-    public CommentDTO updateComment(Long commentId, CommentDTO commentDTO, Long userId, MultipartFile imageFile) { // ✅ String loginId -> Long userId
+    public CommentDTO updateComment(Long commentId, CommentDTO commentDTO, Long userId, MultipartFile imageFile) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-        // ✅ comment.getUser().getLoginId().equals(loginId) -> comment.getUser().getUserId().equals(userId)
         if (!comment.getUser().getUserId().equals(userId)) {
             throw new IllegalStateException("댓글 수정 권한이 없습니다.");
         }
@@ -86,11 +84,10 @@ public class CommentService {
         return entityToDto(updatedComment);
     }
 
-    public void deleteComment(Long commentId, Long userId) { // ✅ String loginId -> Long userId
+    public void deleteComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-        // ✅ comment.getUser().getLoginId().equals(loginId) -> comment.getUser().getUserId().equals(userId)
         if (!comment.getUser().getUserId().equals(userId)) {
             throw new IllegalStateException("댓글 삭제 권한이 없습니다.");
         }
@@ -102,11 +99,10 @@ public class CommentService {
         commentRepository.deleteById(commentId);
     }
 
-    public List<CommentDTO> getCommentsByPostId(Long postId) {
-        List<Comment> comments = commentRepository.findByPost_Id(postId);
-        return comments.stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+    // ✅ 수정된 메서드
+    public Page<CommentDTO> getCommentsByPostId(Long postId, Pageable pageable) {
+        Page<Comment> commentsPage = commentRepository.findByPost_Id(postId, pageable);
+        return commentsPage.map(this::entityToDto); // Page 객체의 map 기능을 활용해 DTO로 변환
     }
 
     private String saveImage(MultipartFile imageFile) {

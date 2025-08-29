@@ -1,6 +1,7 @@
 package com.busanit501.findmyfet.dto.user;
 
-import com.busanit501.findmyfet.domain.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,12 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AuthorDto {
     private Long userId;
     private String name;
-
-    public AuthorDto(User user) {
-        this.userId = user.getUserId();
-        this.name = user.getName();
-    }
 }
