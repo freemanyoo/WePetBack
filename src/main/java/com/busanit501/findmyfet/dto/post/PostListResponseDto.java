@@ -9,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +19,6 @@ public class PostListResponseDto {
     private String thumbnailUrl; // 디폴트값 null;
     private PostType postType; // Post 엔티티와 타입을 맞춤
     private Status status;     // Post 엔티티와 타입을 맞춤
-    private LocalDateTime createdAt; // 추가
 
     private AuthorDto author; // AuthorDto 필드 추가
 

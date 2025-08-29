@@ -63,8 +63,7 @@ public class UserController {
     }
 
     @PutMapping("/users/me")
-    public ResponseEntity<CommonResponse<Void>> updateMe(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody UserUpdateRequestDTO requestDTO) {
-        Long userId = userDetails.getUserid();
+    public ResponseEntity<CommonResponse<Void>> updateMe(@AuthenticationPrincipal Long userId, @RequestBody UserUpdateRequestDTO requestDTO) {
         userService.updateMe(userId, requestDTO);
         return ResponseEntity.ok(CommonResponse.of("회원 정보가 수정되었습니다."));
     }

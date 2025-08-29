@@ -119,10 +119,10 @@ public class FindPetPostController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    @jakarta.annotation.security.PermitAll
-    @org.springframework.web.bind.annotation.GetMapping("/api/find-pets/_health")
-    public java.util.Map<String, Object> findPetsHealth() {
-        return java.util.Map.of("ok", true, "path", "/api/find-pets/_health");
+    @PermitAll
+    @GetMapping("/api/find-pets/_health")
+    public Map<String, Object> findPetsHealth() {
+        return Map.of("ok", true, "path", "/api/find-pets/_health");
     }
 
 }

@@ -61,6 +61,9 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         // 쿼리 생성 (N+1 문제 방지를 위해 fetchJoin() 유지)
         JPAQuery<Post> query = queryFactory.selectFrom(post)
                 .leftJoin(post.user).fetchJoin() // 작성자 정보를 함께 조회
+
+                .leftJoin(post.images).fetchJoin() // ❗❗ 이미지 정보도 함께 가져오도록 수정
+
                 .where(booleanBuilder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
@@ -75,7 +78,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         query.orderBy(post.createdAt.desc());
 
 
-        List<Post> content = query.fetch();
+        List<Post> content = query.distinct().fetch();
 
         // 전체 카운트 쿼리
         JPAQuery<Long> countQuery = queryFactory.select(post.count())
