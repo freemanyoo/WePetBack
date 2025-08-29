@@ -1,9 +1,6 @@
-// PostRepositoryCustomImpl.java
-
 package com.busanit501.findmyfet.repository.post;
 
-import com.busanit501.findmyfet.domain.post.Post;
-import com.busanit501.findmyfet.domain.post.QPost;
+import com.busanit501.findmyfet.domain.post.*;
 import com.busanit501.findmyfet.dto.post.FindPetSearchCriteria;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -26,66 +23,63 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         QPost post = QPost.post;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
 
-        // [수정] criteria 객체의 필드를 사용하도록 전체 로직 변경
-
-        // ===== 상세 검색 조건 (FindPetSearchCriteria 기준) =====
+        // ===== String 타입 필드 검색 (contains 또는 equalsIgnoreCase 사용) =====
         if (criteria.hasTitle()) {
             booleanBuilder.and(post.title.contains(criteria.getTitle()));
         }
         if (criteria.hasAnimalName()) {
             booleanBuilder.and(post.animalName.contains(criteria.getAnimalName()));
         }
-        if (criteria.getLostTimeFrom() != null) {
-            booleanBuilder.and(post.lostTime.goe(criteria.getLostTimeFrom()));
-        }
-        if (criteria.getLostTimeTo() != null) {
-            booleanBuilder.and(post.lostTime.loe(criteria.getLostTimeTo()));
-        }
         if (criteria.hasLocation()) {
             booleanBuilder.and(post.location.contains(criteria.getLocation()));
         }
         if (criteria.hasAnimalCategory()) {
-            booleanBuilder.and(post.animalCategory.eq(criteria.getAnimalCategory()));
+            // animalCategory는 String이므로 대소문자 무시하고 비교
+            booleanBuilder.and(post.animalCategory.equalsIgnoreCase(criteria.getAnimalCategory().trim()));
         }
         if (criteria.hasAnimalBreed()) {
-            booleanBuilder.and(post.animalBreed.eq(criteria.getAnimalBreed()));
+            // animalBreed는 String이므로 대소문자 무시하고 비교
+            booleanBuilder.and(post.animalBreed.equalsIgnoreCase(criteria.getAnimalBreed().trim()));
         }
+
+        // ===== Enum 타입 필드 검색 (문자열을 Enum으로 변환하여 비교) =====
         if (StringUtils.hasText(criteria.getPostType())) {
-            booleanBuilder.and(post.postType.stringValue().equalsIgnoreCase(criteria.getPostType()));
+            // ✅ [수정] 문자열을 PostType Enum으로 변환하여 비교
+            booleanBuilder.and(post.postType.eq(PostType.valueOf(criteria.getPostType().toUpperCase())));
         }
         if (StringUtils.hasText(criteria.getStatus())) {
-            booleanBuilder.and(post.status.stringValue().equalsIgnoreCase(criteria.getStatus()));
+            // ✅ [수정] 문자열을 Status Enum으로 변환하여 비교
+            booleanBuilder.and(post.status.eq(Status.valueOf(criteria.getStatus().toUpperCase())));
         }
-        // (기타 animalAge 등 필요한 조건이 있다면 여기에 추가)
+        if (StringUtils.hasText(criteria.getGender())) {
+            // ✅ [수정] 문자열을 AnimalGender Enum으로 변환하여 비교
+            booleanBuilder.and(post.gender.eq(AnimalGender.valueOf(criteria.getGender().toUpperCase())));
+        }
 
-        // 쿼리 생성 (N+1 문제 방지를 위해 fetchJoin() 유지)
+        // ===== 날짜 범위 검색 =====
+        if (criteria.getLostTimeFrom() != null) {
+            booleanBuilder.and(post.lostTime.goe(criteria.getLostTimeFrom())); // greater than or equal
+        }
+        if (criteria.getLostTimeTo() != null) {
+            booleanBuilder.and(post.lostTime.loe(criteria.getLostTimeTo())); // less than or equal
+        }
+
+        // 쿼리 생성 (N+1 문제 방지를 위해 fetchJoin 유지)
         JPAQuery<Post> query = queryFactory.selectFrom(post)
-                .leftJoin(post.user).fetchJoin() // 작성자 정보를 함께 조회
-
-                .leftJoin(post.images).fetchJoin() // ❗❗ 이미지 정보도 함께 가져오도록 수정
-
+                .leftJoin(post.user).fetchJoin()
                 .where(booleanBuilder)
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
+                .limit(pageable.getPageSize())
+                .orderBy(post.createdAt.desc()); // 기본 정렬
 
-        // 정렬 조건 적용 (Pageable 객체에 정렬 정보가 포함되어 있음)
-        // Querydsl은 Pageable의 정렬을 자동으로 처리하지 않으므로 수동으로 추가해주는 것이 좋습니다.
-        // PostServiceImpl에서 이미 Pageable에 정렬 정보를 담았으므로 여기서는 orderBy를 추가합니다.
-        pageable.getSort().stream().forEach(order -> {
-            // 정렬 로직 추가 (필요 시 더 복잡한 정렬 처리 가능)
-        });
-        // 기본 정렬
-        query.orderBy(post.createdAt.desc());
-
-
-        List<Post> content = query.distinct().fetch();
+        List<Post> content = query.fetch();
 
         // 전체 카운트 쿼리
         JPAQuery<Long> countQuery = queryFactory.select(post.count())
                 .from(post)
                 .where(booleanBuilder);
 
-        long total = countQuery.fetchOne() != null ? countQuery.fetchOne() : 0;
+        long total = countQuery.fetchOne() != null ? countQuery.fetchOne() : 0L;
 
         return new PageImpl<>(content, pageable, total);
     }
