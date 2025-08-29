@@ -60,6 +60,7 @@ public class FindPetPostController {
             options.put("animalCategories", findPetPostService.getAllAnimalCategories());
             options.put("postTypes", findPetPostService.getAllPostTypes());
             options.put("locations", findPetPostService.getAllLocations());
+            options.put("genders", findPetPostService.getAllGenders());
             return ResponseEntity.ok(options);
         } catch (Exception e) {
             log.error("필터 옵션 조회 중 오류 발생", e);
