@@ -4,6 +4,7 @@ import com.busanit501.findmyfet.domain.User;
 import com.busanit501.findmyfet.domain.post.AnimalGender;
 import com.busanit501.findmyfet.domain.post.Image;
 import com.busanit501.findmyfet.domain.post.Post;
+import com.busanit501.findmyfet.dto.post.ImageDto;
 import com.busanit501.findmyfet.dto.post.MyPostResponseDto;
 import com.busanit501.findmyfet.dto.post.PostDetailResponseDto;
 import com.busanit501.findmyfet.dto.post.PostListResponseDto;
@@ -44,11 +45,11 @@ public class RootConfig {
                             context.getSource() == null ? null : context.getSource().getDescription()
                     ).map(Post::getGender, PostDetailResponseDto::setGender);
 
-                    mapper.using((Converter<List<Image>, List<String>>) context ->
+                    mapper.using((Converter<List<Image>, List<ImageDto>>) context ->
                             context.getSource() == null ? null : context.getSource().stream()
-                                    .map(Image::getImageUrl)
+                                    .map(image -> new ImageDto(image.getId(), image.getImageUrl()))
                                     .collect(Collectors.toList())
-                    ).map(Post::getImages, PostDetailResponseDto::setImageUrls);
+                    ).map(Post::getImages, PostDetailResponseDto::setImages);
 
                     // author 필드는 Post 엔티티의 user 필드를 사용하여 매핑하도록 명시
                     mapper.map(Post::getUser, PostDetailResponseDto::setAuthor);
