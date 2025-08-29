@@ -1,5 +1,6 @@
 package com.busanit501.findmyfet.service;
 
+import com.busanit501.findmyfet.domain.post.AnimalGender;
 import com.busanit501.findmyfet.domain.post.Post;
 import com.busanit501.findmyfet.dto.post.FindPetSearchCriteria;
 import com.busanit501.findmyfet.repository.FindPostRepository;   // ✅ 이 리포만 사용
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +47,16 @@ public class FindPetPostService {
         return postRepository.findDistinctAnimalCategories();
     }
 
+    // ✅ 여기에 아래 메서드를 추가해주세요.
+    /** 모든 성별 목록 (Enum -> List<Map>) */
+    public List<Map<String, String>> getAllGenders() {
+        return Arrays.stream(AnimalGender.values())
+                .map(gender -> Map.of(
+                        "value", gender.name(),          // 예: "MALE"
+                        "label", gender.getDescription() // 예: "수컷"
+                ))
+                .collect(Collectors.toList());
+    }
     /** 모든 게시글 타입 (enum 없이 하드코딩 목록 반환) */
     public List<Map<String, String>> getAllPostTypes() {
         List<Map<String, String>> postTypes = new ArrayList<>();

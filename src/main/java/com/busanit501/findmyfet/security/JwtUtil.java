@@ -41,7 +41,7 @@ public class JwtUtil {
     }
 
     public String generateAccessToken(String loginId, String role) {
-        return generateToken(loginId, role, 1); // 1시간 유효
+        return generateToken(loginId, role, 24); // 24시간 (1일) 유효
     }
 
     public String generateRefreshToken(String loginId, String role) {

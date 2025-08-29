@@ -41,5 +41,6 @@ public class PostDetailResponseDto {
     private LocalDateTime createdAt;
     private AuthorDto author; // TODO: User 기능 연동 후 추가
     private List<String> imageUrls; // 이미지 URL 목록
+    private List<com.busanit501.findmyfet.dto.CommentDTO> comments; // 댓글 목록
 
 }

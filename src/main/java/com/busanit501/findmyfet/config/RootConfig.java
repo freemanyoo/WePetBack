@@ -65,13 +65,31 @@ public class RootConfig {
                     ).map(Post::getImages, PostListResponseDto::setThumbnailUrl);
 
                     // author 필드는 Post 엔티티의 user 필드를 사용하여 매핑하도록 명시
-                    mapper.map(Post::getUser, PostListResponseDto::setAuthor);
+                    mapper.using((Converter<User, AuthorDto>) context -> {
+                        User source = context.getSource();
+                        if (source == null) {
+                            return null;
+                        }
+                        return AuthorDto.builder()
+                                .userId(source.getUserId())
+                                .name(source.getName())
+                                .build();
+                    }).map(Post::getUser, PostListResponseDto::setAuthor);
                 });
 
         // Post -> MyPostResponseDto 매핑 설정
         modelMapper.createTypeMap(Post.class, MyPostResponseDto.class)
                 .addMappings(mapper -> {
                     mapper.map(Post::getId, MyPostResponseDto::setPostId);
+                });
+
+        // Comment -> CommentDTO 매핑 설정
+        modelMapper.createTypeMap(com.busanit501.findmyfet.domain.Comment.class, com.busanit501.findmyfet.dto.CommentDTO.class)
+                .addMappings(mapper -> {
+                    mapper.map(src -> src.getPost().getId(), com.busanit501.findmyfet.dto.CommentDTO::setPostId);
+                    mapper.map(src -> src.getUser().getUserId(), com.busanit501.findmyfet.dto.CommentDTO::setUserId);
+                    mapper.map(src -> src.getUser().getName(), com.busanit501.findmyfet.dto.CommentDTO::setUserName);
+                    mapper.map(src -> src.getUser().getLoginId(), com.busanit501.findmyfet.dto.CommentDTO::setLoginId);
                 });
 
         return modelMapper;

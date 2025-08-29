@@ -10,6 +10,7 @@ import com.busanit501.findmyfet.dto.post.*;
 import com.busanit501.findmyfet.repository.post.ImageRepository;
 import com.busanit501.findmyfet.repository.post.PostRepository;
 import com.busanit501.findmyfet.repository.UserRepository;
+import com.busanit501.findmyfet.repository.CommentRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,7 @@ public class PostServiceImpl implements PostService {
     private final FileUploadService fileUploadService;
     private final UserRepository  userRepository;
     private final ModelMapper modelMapper;
+    private final CommentRepository commentRepository;
 
     // 페이징처리 + 게시판 조회
     @Override
@@ -131,8 +133,17 @@ public class PostServiceImpl implements PostService {
     public PostDetailResponseDto findPostById(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
-        // [기존] new PostDetailResponseDto(post) -> modelMapper.map()
-        return modelMapper.map(post, PostDetailResponseDto.class);
+
+        PostDetailResponseDto responseDto = modelMapper.map(post, PostDetailResponseDto.class);
+
+//        // 댓글 목록 조회 및 DTO 변환
+//        List<com.busanit501.findmyfet.domain.Comment> comments = commentRepository.findByPost_Id(postId);
+//        List<com.busanit501.findmyfet.dto.CommentDTO> commentDTOs = comments.stream()
+//                .map(comment -> modelMapper.map(comment, com.busanit501.findmyfet.dto.CommentDTO.class))
+//                .collect(Collectors.toList());
+//        responseDto.setComments(commentDTOs);
+
+        return responseDto;
     }
 
     // 내 게시글 찾기

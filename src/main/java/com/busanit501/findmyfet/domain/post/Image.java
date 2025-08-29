@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = {"post"}) // ❗ "comment" 제거
+@ToString(exclude = {"post", "comment"}) // 순환참조 방지함
 public class Image {
 
     @Id
@@ -24,7 +24,14 @@ public class Image {
     // 이미지를 조회할 때 연관된 Post 정보가 항상 필요하진 않으므로 LAZY(지연로딩) 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id") // 외래키 컬럼명 지정
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Post post;
+
+    // N:1, Image(N) : Comment(1)
+    // Comment 엔티티 생성 후 주석 해제 및 import 필요
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "comment_id")
+    // private Comment comment;
 
 
     //== 연관관계 편의 메서드 ==//
@@ -33,4 +40,8 @@ public class Image {
         this.post = post;
     }
 
+//    // Comment 정보가 업데이트 될 때, Image 쪽에서도 Comment 정보를 동기화
+//    public void setComment(Comment comment) {
+//        this.comment = comment;
+//    }
 }

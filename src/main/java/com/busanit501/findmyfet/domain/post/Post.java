@@ -3,7 +3,7 @@ package com.busanit501.findmyfet.domain.post;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.busanit501.findmyfet.domain.Comment;
+
 import com.busanit501.findmyfet.domain.BaseEntity;
 import com.busanit501.findmyfet.domain.User;
 import com.busanit501.findmyfet.dto.post.PostUpdateRequestDto;
@@ -20,7 +20,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor // Builder 패턴 쓰기위해서 모든 필드에 생성자 추가
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = {"images", "user", "comments"})
+@ToString(exclude = {"images", "user"}) // images 필드는 ToString에서 제외
+
 public class Post extends BaseEntity {
 
 
@@ -72,11 +73,9 @@ public class Post extends BaseEntity {
     private List<Image> images = new ArrayList<>();
 
     // 1:N, Post(1) : Comment(N)
-    // Post 삭제 시 연관된 모든 Comment가 함께 삭제되도록 설정
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Comment> comments = new ArrayList<>();
-
+    private List<com.busanit501.findmyfet.domain.Comment> comments = new ArrayList<>();
 
     // 연관관계의 주인 : Post(N쪽)
     @ManyToOne(fetch = FetchType.LAZY)
