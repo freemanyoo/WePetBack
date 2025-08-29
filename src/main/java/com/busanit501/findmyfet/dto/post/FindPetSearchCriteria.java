@@ -18,7 +18,8 @@ public class FindPetSearchCriteria {
 
     // 검색 조건
     private String title;
-    private String animalName;
+    // private String animalName; // 주석 처리된 부분
+    private String authorName;
 
     // 필터 조건
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -31,7 +32,7 @@ public class FindPetSearchCriteria {
     private String animalCategory;
     private String animalBreed;
 
-    private String gender; // ✅ 이 필드를 추가해주세요.
+    private String gender;
 
     private String postType;
     private String status;
@@ -58,7 +59,12 @@ public class FindPetSearchCriteria {
 
     // (이하 헬퍼 메서드는 그대로 유지)
     public boolean hasTitle() { return title != null && !title.trim().isEmpty(); }
-    public boolean hasAnimalName() { return animalName != null && !animalName.trim().isEmpty(); }
+    // public boolean hasAnimalName() { return animalName != null && !animalName.trim().isEmpty(); } // 주석 처리된 부분
+
+    // ✅ [추가된 부분] authorName과 gender의 헬퍼 메서드
+    public boolean hasAuthorName() { return authorName != null && !authorName.trim().isEmpty(); }
+    public boolean hasGender() { return gender != null && !gender.trim().isEmpty(); }
+
     public boolean hasDateTimeRange() { return lostTimeFrom != null || lostTimeTo != null; }
     public boolean hasLocation() { return location != null && !location.trim().isEmpty(); }
     public boolean hasAnimalCategory() { return animalCategory != null && !animalCategory.trim().isEmpty(); }
