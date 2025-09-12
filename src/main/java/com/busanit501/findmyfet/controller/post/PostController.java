@@ -6,6 +6,7 @@ import com.busanit501.findmyfet.dto.post.*; // DTO 한번에 import
 import com.busanit501.findmyfet.service.post.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2; // Added Log4j2 import
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts")
+@Log4j2 // Added Log4j2 annotation
 public class PostController {
 
     private final PostService postService;
