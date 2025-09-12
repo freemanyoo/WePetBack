@@ -41,6 +41,15 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    /**
+     * @설명 사용자 로그인 처리 및 JWT 토큰 발급
+     * @기능 사용자의 로그인 ID와 비밀번호를 검증하고, 인증에 성공하면 Access Token과 Refresh Token을 발급합니다.
+     *       발급된 Refresh Token은 데이터베이스에 저장하여 토큰 재발급 시 활용됩니다.
+     * @파라미터 loginId - 사용자의 로그인 ID
+     * @파라미터 password - 사용자의 비밀번호
+     * @반환 LoginResponseDTO - 발급된 Access Token, Refresh Token 및 사용자 정보를 포함하는 DTO
+     * @예외 IllegalArgumentException - 로그인 ID가 존재하지 않거나 비밀번호가 일치하지 않을 경우 발생
+     */
     public LoginResponseDTO login(String loginId, String password) {
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 아이디입니다."));

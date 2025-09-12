@@ -131,17 +131,19 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public PostDetailResponseDto findPostById(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
+        Post post = postRepository.findByIdWithImages(postId); // Use the new method
+        if (post == null) { // findByIdWithImages returns null if not found
+            throw new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId);
+        }
 
         PostDetailResponseDto responseDto = modelMapper.map(post, PostDetailResponseDto.class);
 
-//        // 댓글 목록 조회 및 DTO 변환
-//        List<com.busanit501.findmyfet.domain.Comment> comments = commentRepository.findByPost_Id(postId);
-//        List<com.busanit501.findmyfet.dto.CommentDTO> commentDTOs = comments.stream()
-//                .map(comment -> modelMapper.map(comment, com.busanit501.findmyfet.dto.CommentDTO.class))
-//                .collect(Collectors.toList());
-//        responseDto.setComments(commentDTOs);
+        // 댓글 목록 조회 및 DTO 변환
+        List<com.busanit501.findmyfet.domain.Comment> comments = commentRepository.findByPost_Id(postId);
+        List<com.busanit501.findmyfet.dto.CommentDTO> commentDTOs = comments.stream()
+                .map(comment -> modelMapper.map(comment, com.busanit501.findmyfet.dto.CommentDTO.class))
+                .collect(Collectors.toList());
+        responseDto.setComments(commentDTOs);
 
         return responseDto;
     }

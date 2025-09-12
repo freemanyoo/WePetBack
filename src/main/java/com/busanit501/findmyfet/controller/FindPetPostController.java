@@ -60,6 +60,7 @@ public class FindPetPostController {
             options.put("animalCategories", findPetPostService.getAllAnimalCategories());
             options.put("postTypes", findPetPostService.getAllPostTypes());
             options.put("locations", findPetPostService.getAllLocations());
+            options.put("genders", findPetPostService.getAllGenders());
             return ResponseEntity.ok(options);
         } catch (Exception e) {
             log.error("필터 옵션 조회 중 오류 발생", e);
@@ -119,10 +120,10 @@ public class FindPetPostController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    @jakarta.annotation.security.PermitAll
-    @org.springframework.web.bind.annotation.GetMapping("/api/find-pets/_health")
-    public java.util.Map<String, Object> findPetsHealth() {
-        return java.util.Map.of("ok", true, "path", "/api/find-pets/_health");
+    @PermitAll
+    @GetMapping("/api/find-pets/_health")
+    public Map<String, Object> findPetsHealth() {
+        return Map.of("ok", true, "path", "/api/find-pets/_health");
     }
 
 }

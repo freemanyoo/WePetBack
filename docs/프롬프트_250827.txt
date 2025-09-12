@@ -1,5 +1,5 @@
 React를 이용한 프론트엔드, SpringBoot를 이용한 백엔드를 이용해서 웹프로젝트를 하려하는데 개발환경으로는 intelli J IDEA, intelli J Webstrom, MariaDB, docker, Node.js 를 이용할거야.
-개발도구로는 Spring Data JPA(JpaRepository), QueryDSL, axios 비동기통신, Lombok Spring Boot devTools, ModelMapper, Spring Security, MultiPart통신을 이용한 이미지첨부파일 등록  등 을 이용할거야.
+개발도구로는 Spring Data JPA(JpaRepository),node.js, QueryDSL, axios 비동기통신, Lombok Spring Boot devTools, ModelMapper, Spring Security, MultiPart통신을 이용한 이미지첨부파일 등록  등 을 이용할거야.
 
 해당 파일을 공유해줄게.
 1. 현재 파일들끼리 유기적으로 결합이 되어있는지.
